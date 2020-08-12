@@ -7,12 +7,20 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ../ecommerce:/ecommerce
-    depends_on:
-      - db
-      - redis
+    networks:
+      - app-network
     working_dir: /ecommerce
+    container_name: php
     environment:
       PHP_IDE_CONFIG: serverName=${PROJECT_NAME}
+
+#  nginx-proxy:
+#    image: jwilder/nginx-proxy
+#    ports:
+#      - "80:80"
+#    volumes:
+#      - /var/run/docker.sock:/tmp/docker.sock:ro
+
 
   ## nginx
   nginx:
@@ -29,20 +37,22 @@ services:
         source: ./.docker/localdev/nginx/conf.d
         target: /etc/nginx/conf.d
         read_only: true
-    depends_on:
-      - php
-      - node
+    networks:
+      - app-network
     ports:
-      - "8000:80"
+      - "8000:8000"
       - "443:443"
     working_dir: /ecommerce
 
   db:
     image: postgres:12.3
     volumes:
-      - ./db-data:/var/lib/postgresql/data/
+      - db_backup:/var/lib/postgresql/data
     ports:
       - 5432:5432
+    container_name: db
+    networks:
+      - app-network
     environment:
       POSTGRES_USER: atm
       POSTGRES_PASSWORD: admin@123
@@ -54,18 +64,26 @@ services:
     image: redis:alpine
 
   ## node
-  node:
-    container_name: node
-    image: node
-    volumes:
-      - type: bind
-        source: ../ecommerce
-        target: /ecommerce
-      - type: bind
-        source: .docker/localdev/node/scripts
-        target: /scripts
-        read_only: true
-    depends_on:
-      - db
-    working_dir: /ecommerce
-    entrypoint: /scripts/bootstrap.sh
+#  node:
+#    container_name: node
+#    image: node:latest
+#    volumes:
+#      - type: bind
+#        source: ../ecommerce
+#        target: /ecommerce
+#      - type: bind
+#        source: .docker/localdev/node/scripts
+#        target: /scripts
+#        read_only: true
+#    networks:
+#      - app-network
+#    working_dir: /ecommerce
+#    entrypoint: /scripts/bootstrap.sh
+
+volumes:
+  db_backup:
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
