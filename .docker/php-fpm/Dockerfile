@@ -1,4 +1,5 @@
 FROM php:7.4-fpm-alpine as php
+
 RUN apk update && apk add --no-cache \
         zip \
         libzip-dev \
@@ -13,7 +14,8 @@ RUN apk update && apk add --no-cache \
         openssl-dev \
         oniguruma-dev \
         postgresql-client \
-        postgresql-dev
+        postgresql-dev \
+        git
 
 FROM php as php-xdebug
 

@@ -2,31 +2,23 @@ version: "3.7"
 services:
   ## php-fpm
   php:
+    container_name: php
     build:
-      context: ./.docker/localdev/php-fpm
+      context: ./.docker/php-fpm
       dockerfile: Dockerfile
     volumes:
       - ../ecommerce:/ecommerce
     networks:
       - app-network
     working_dir: /ecommerce
-    container_name: php
     environment:
       PHP_IDE_CONFIG: serverName=${PROJECT_NAME}
-
-#  nginx-proxy:
-#    image: jwilder/nginx-proxy
-#    ports:
-#      - "80:80"
-#    volumes:
-#      - /var/run/docker.sock:/tmp/docker.sock:ro
-
 
   ## nginx
   nginx:
     container_name: web
     build:
-      context: ./.docker/localdev/nginx
+      context: ./.docker/nginx
       dockerfile: Dockerfile
     volumes:
       - ../ecommerce:/ecommerce
@@ -34,7 +26,7 @@ services:
 #        source: ./swagger
 #        target: /swagger
       - type: bind
-        source: ./.docker/localdev/nginx/conf.d
+        source: ./.docker/nginx/conf.d
         target: /etc/nginx/conf.d
         read_only: true
     networks:
@@ -54,9 +46,9 @@ services:
     networks:
       - app-network
     environment:
-      POSTGRES_USER: atm
-      POSTGRES_PASSWORD: admin@123
-      POSTGRES_DB: ecommerce
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
 
   ## redis
   redis:
@@ -72,7 +64,7 @@ services:
 #        source: ../ecommerce
 #        target: /ecommerce
 #      - type: bind
-#        source: .docker/localdev/node/scripts
+#        source: .docker/node/scripts
 #        target: /scripts
 #        read_only: true
 #    networks:
