@@ -26,6 +26,7 @@ RUN set -xe \
     && apk del --no-network .phpize-deps
 
 RUN docker-php-ext-install \
+    exif \
     pdo \
     pdo_pgsql \
     gd \
@@ -43,5 +44,7 @@ RUN docker-php-ext-install \
     && echo "xdebug.remote_connect_back=0" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.idekey=phpstorm" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_host=10.254.254.254" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && rm -rf /tmp/*
+
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+COPY php.ini /usr/local/etc/php

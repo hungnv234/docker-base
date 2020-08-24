@@ -7,7 +7,7 @@ RUN mkdir -p /etc/pki/tls/private
 RUN mkdir -p /etc/pki/tls/CA
 RUN mkdir -p /etc/pki/CA && cd /etc/pki/CA && mkdir certs crl newcerts tsaserial private
 RUN touch /etc/pki/CA/index.txt && echo 00 > /etc/pki/CA/serial
-COPY ./ssl/openssl.conf /etc/ssl/openssl.conf
+COPY ssl/openssl.conf /etc/ssl/openssl.conf
 
 RUN openssl genrsa 2048 > /etc/pki/tls/CA/CA.key
 RUN openssl req -new -config /etc/ssl/openssl.conf -key /etc/pki/tls/CA/CA.key -out /etc/pki/tls/CA/cacert.csr -subj "/C=JP/ST=Tokyo/L=Chiyoda-ku/O=My Company/OU=Development Section/CN=localhost"

@@ -8,4 +8,4 @@ node_modules
 prebuilds/*
 angle/build/*
 example/**/*.ppm
-/db-data
+data
