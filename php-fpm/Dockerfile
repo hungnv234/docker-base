@@ -4,6 +4,8 @@ RUN apk update && apk add --no-cache \
         zip \
         libzip-dev \
         libpng \
+        freetype-dev \
+        libjpeg-turbo-dev \
         libpng-dev \
         libjpeg \
         icu \
@@ -25,11 +27,12 @@ RUN set -xe \
     && docker-php-ext-enable xdebug redis \
     && apk del --no-network .phpize-deps
 
-RUN docker-php-ext-install \
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
     exif \
     pdo \
     pdo_pgsql \
-    gd \
+    -j$(nproc) gd \
     mbstring \
     intl \
     xml \
