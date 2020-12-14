@@ -6,11 +6,14 @@ services:
     build:
       context: ./php-fpm
       dockerfile: Dockerfile
+#    image: yfix/php:7.4
     volumes:
-      - ../ecommerce:/ecommerce
+#      - ../ecommerce:/ecommerce
+      - ../xbot-blog:/xbot-blog
+      - ../xbot-php:/xbot-php
     networks:
       - app-network
-    working_dir: /ecommerce
+    working_dir: ${WORKING_DIR}
     environment:
       PHP_IDE_CONFIG: serverName=${PROJECT_NAME}
 
@@ -21,10 +24,8 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     volumes:
-      - ../ecommerce:/ecommerce
-#      - type: bind
-#        source: ./swagger
-#        target: /swagger
+      - ../xbot-blog:/xbot-blog
+      - ../xbot-php:/xbot-php
       - type: bind
         source: ./nginx/conf.d
         target: /etc/nginx/conf.d
@@ -34,7 +35,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    working_dir: /ecommerce
+    working_dir: ${WORKING_DIR}
 
   db:
     image: postgres:12.3
@@ -62,22 +63,31 @@ services:
     networks:
       - app-network
 
-  ## node
-#  node:
-#    container_name: node
-#    image: node:latest
-#    volumes:
-#      - type: bind
-#        source: ../ecommerce
-#        target: /ecommerce
-#      - type: bind
-#        source: node/scripts
-#        target: /scripts
-#        read_only: true
-#    networks:
-#      - app-network
-#    working_dir: /ecommerce
-#    entrypoint: /scripts/bootstrap.sh
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - app-network
+  # https://stackoverflow.com/questions/53089486/unable-to-connect-to-kafka-run-in-container-from-spring-boot-app-run-outside-con
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - '9092:9092'
+      - '29092:29092'
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+    depends_on:
+      - zookeeper
+    networks:
+      - app-network
 
 volumes:
   db_backup:

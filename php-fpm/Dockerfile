@@ -1,6 +1,7 @@
 FROM php:7.4-fpm-alpine as php
 
 RUN apk update && apk add --no-cache \
+        autoconf \
         zip \
         libzip-dev \
         libpng \
@@ -23,7 +24,7 @@ FROM php as php-xdebug
 
 RUN set -xe \
     && apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS  \
-    && pecl install xdebug redis \
+    && pecl install xdebug-2.9.6 redis \
     && docker-php-ext-enable xdebug redis \
     && apk del --no-network .phpize-deps
 
@@ -41,8 +42,10 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     zip \
     && echo "xdebug.default_enable=off" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_enable=on" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+#    && echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_autostart=on" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+#    && echo "xdebug.client_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_handler=dbgp" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.remote_connect_back=0" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.idekey=phpstorm" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
